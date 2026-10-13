@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego Interactivo - Escuela Winston</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #2b1055 0%, #7597de 100%);
+      min-height: 100vh;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      color: #ffd700;
+      font-size: 2rem;
+      text-shadow: 2px 2px 4px #000;
+      margin-bottom: 5px;
+    }
+
+    /* Pestañas de Navegación */
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      background: #4a154b;
+      color: #fff;
+      border: 3px solid #ffd700;
+      padding: 10px 18px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: #ff79c6;
+      color: #1a0933;
+      transform: scale(1.05);
+    }
+
+    /* Targetas de Juego */
+    .game-card {
+      background: rgba(40, 17, 77, 0.95);
+      border: 4px solid #ff79c6;
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 750px;
+      display: none;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    .game-card.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- JUEGO 1: DICTADO --- */
+    .dictado-header {
+      background: #3c1a6e;
+      border: 2px dashed #ffd700;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .audio-btn {
+      background: #ff79c6;
+      border: none;
+      color: #fff;
+      padding: 8px 15px;
+      font-size: 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+
+    .dictado-input {
+      width: 90%;
+      padding: 12px;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      border: 3px solid #bd93f9;
+      text-align: center;
+      margin: 15px 0;
+      outline: none;
+    }
+
+    .btn-submit {
+      background: #50fa7b;
+      color: #1a0933;
+      border: none;
+      padding: 10px 25px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    /* Feedback */
+    .feedback {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-top: 15px;
+      min-height: 40px;
+    }
+
+    .correct { color: #50fa7b; text-shadow: 1px 1px 2px #000; }
+    .incorrect { color: #ff5555; text-shadow: 1px 1px 2px #000; }
+
+    /* --- JUEGO 2: MOUSE --- */
+    .drag-area {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #3c1a6e;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 15px;
+      min-height: 180px;
+    }
+
+    .drag-item {
+      font-size: 4rem;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s;
+    }
+
+    .drag-item:active {
+      cursor: grabbing;
+      transform: scale(1.2);
+    }
+
+    .drop-zone {
+      width: 110px;
+      height: 110px;
+      border: 4px dashed #50fa7b;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      background: rgba(80, 250, 123, 0.1);
+    }
+
+    /* --- JUEGO 3: LOGIN --- */
+    .login-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .login-input {
+      width: 90%;
+      max-width: 380px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 2px solid #bd93f9;
+      text-align: center;
+    }
+
+    .domain-btn {
+      background: #8be9fd;
+      color: #1a0933;
+      border: none;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Enchanted Winston School 🎓</h1>
+    <p>Juegos interactivos de aprendizaje - 1º de Primaria</p>
+  </header>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchGame(1)">1. Dictado de Oraciones 📝</button>
+    <button class="tab-btn" onclick="switchGame(2)">2. Juego del Mouse 🐭</button>
+    <button class="tab-btn" onclick="switchGame(3)">3. Práctica de Login 🔑</button>
+  </div>
+
+  <!-- JUEGO 1: DICTADO -->
+  <div id="game1" class="game-card active">
+    <h2>📝 Dictado de Oraciones</h2>
+    <div class="dictado-header">
+      <h3 id="dictado-num">Oración 1 de 10</h3>
+      <button class="audio-btn" onclick="speakCurrentSentence()">🔊 Escuchar Oración</button>
+    </div>
+
+    <input type="text" id="dictado-input" class="dictado-input" placeholder="Escribe aquí y presiona ENTER..." autocomplete="off">
+    <br>
+    <button class="btn-submit" onclick="evaluateDictado()">Enviar (Enter) 🚀</button>
+
+    <div id="dictado-feedback" class="feedback"></div>
+    <div id="dictado-score" style="margin-top: 10px; color: #ffd700;">Aciertos: 0 / 10</div>
+  </div>
+
+  <!-- JUEGO 2: MOUSE -->
+  <div id="game2" class="game-card">
+    <h2>🐭 Juego del Mouse</h2>
+    <h3 id="mouse-level" style="color: #ffd700; margin-top: 5px;">Nivel 1 de 10</h3>
+    <p>Arrastra la figura mágica hasta la casilla objetivo:</p>
+
+    <div class="drag-area">
+      <div id="drag-item" class="drag-item" draggable="true" ondragstart="drag(event)">👻</div>
+      <div class="drop-zone" ondragover="allowDrop(event)" ondrop="drop(event)">🎯</div>
+    </div>
+
+    <div id="mouse-feedback" class="feedback"></div>
+  </div>
+
+  <!-- JUEGO 3: LOGIN -->
+  <div id="game3" class="game-card">
+    <h2>🔑 Práctica de Correo y Contraseña</h2>
+    <p>Escribe tu correo que termine en <b>@winston93.edu.mx</b>:</p>
+
+    <div class="login-box">
+      <div>
+        <input type="text" id="email-input" class="login-input" placeholder="usuario@winston93.edu.mx">
+        <br>
+        <button class="domain-btn" onclick="addDomain()">+ Añadir @winston93.edu.mx</button>
+      </div>
+
+      <div>
+        <input type="password" id="pass-input" class="login-input" placeholder="Escribe tu contraseña">
+      </div>
+
+      <button class="btn-submit" onclick="checkLogin()">Iniciar Sesión 🚪</button>
+    </div>
+
+    <div id="login-feedback" class="feedback"></div>
+  </div>
+
+  <script>
+    // --- NAVEGACIÓN ---
+    function switchGame(num) {
+      document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`game${num}`).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // --- JUEGO 1: DICTADO ---
+    const sentences = [
+      "Mi mamá me prepara un rico desayuno por la mañana.",
+      "El gato pequeño duerme en su cama azul.",
+      "La niña juega con su pelota en el patio.",
+      "El sol brilla y calienta toda la escuela.",
+      "Mi papá me lleva a la escuela temprano.",
+      "El conejo blanco come una zanahoria muy grande.",
+      "Mi maestra nos lee un cuento divertido en clase.",
+      "Los niños juegan felices en el parque por la tarde.",
+      "Mi perro corre rápido y mueve mucho la cola.",
+      "La mariposa de colores vuela entre las flores del jardín."
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+
+    const inputDictado = document.getElementById('dictado-input');
+    const feedbackDictado = document.getElementById('dictado-feedback');
+
+    inputDictado.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') evaluateDictado();
+    });
+
+    function speakCurrentSentence() {
+      if ('speechSynthesis' in window && currentIdx < sentences.length) {
+        const msg = new SpeechSynthesisUtterance(sentences[currentIdx]);
+        msg.lang = 'es-ES';
+        window.speechSynthesis.speak(msg);
+      }
+    }
+
+    function evaluateDictado() {
+      if (currentIdx >= sentences.length) return;
+
+      const userText = inputDictado.value.trim();
+      const targetText = sentences[currentIdx];
+
+      if (userText === targetText) {
+        feedbackDictado.innerHTML = "✔ ¡Excelente trabajo! Palomita para ti 🎉";
+        feedbackDictado.className = "feedback correct";
+        score++;
+      } else {
+        feedbackDictado.innerHTML = `✖ Tachita. Revisa la ortografía exacto como el dictado.`;
+        feedbackDictado.className = "feedback incorrect";
+      }
+
+      currentIdx++;
+      document.getElementById('dictado-score').innerText = `Aciertos: ${score} / 10`;
+
+      if (currentIdx < sentences.length) {
+        setTimeout(() => {
+          document.getElementById('dictado-num').innerText = `Oración ${currentIdx + 1} de 10`;
+          inputDictado.value = "";
+          feedbackDictado.innerText = "";
+        }, 2000);
+      } else {
+        setTimeout(() => {
+          document.getElementById('dictado-num').innerText = "¡Dictado Terminado!";
+          inputDictado.style.display = "none";
+          feedbackDictado.innerHTML = `🌟 ¡Felicidades! Lograste ${score} aciertos de 10.`;
+        }, 2000);
+      }
+    }
+
+    // --- JUEGO 2: MOUSE ---
+    const icons = ["👻", "🎃", "🐱", "🏰", "🎩", "🍬", "🕷️", "🧹", "⭐", "🏆"];
+    let mouseLevel = 0;
+
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+
+    function drop(ev) {
+      ev.preventDefault();
+      mouseLevel++;
+      const fb = document.getElementById('mouse-feedback');
+
+      if (mouseLevel < 10) {
+        fb.innerHTML = "¡Muy bien hecho! 🌟";
+        fb.className = "feedback correct";
+        document.getElementById('mouse-level').innerText = `Nivel ${mouseLevel + 1} de 10`;
+        document.getElementById('drag-item').innerText = icons[mouseLevel];
+        setTimeout(() => { fb.innerText = ""; }, 1000);
+      } else {
+        document.getElementById('mouse-level').innerText = "¡Nivel Máximo!";
+        document.getElementById('drag-item').style.display = "none";
+        fb.innerHTML = "🏆 ¡Felicidades! Dominas el mouse como un profesional.";
+        fb.className = "feedback correct";
+      }
+    }
+
+    // --- JUEGO 3: LOGIN ---
+    function addDomain() {
+      const emailInput = document.getElementById('email-input');
+      if (!emailInput.value.includes('@')) {
+        emailInput.value += '@winston93.edu.mx';
+      }
+    }
+
+    function checkLogin() {
+      const email = document.getElementById('email-input').value.trim();
+      const pass = document.getElementById('pass-input').value.trim();
+      const fb = document.getElementById('login-feedback');
+
+      if (email.endsWith("@winston93.edu.mx") && pass.length >= 4) {
+        fb.innerHTML = "✔ ¡Bienvenido/a a la Escuela Winston! 🎉";
+        fb.className = "feedback correct";
+      } else if (!email.endsWith("@winston93.edu.mx")) {
+        fb.innerHTML = "✖ Tu correo debe terminar en <b>@winston93.edu.mx</b>";
+        fb.className = "feedback incorrect";
+      } else {
+        fb.innerHTML = "✖ Escribe una contraseña de al menos 4 caracteres.";
+        fb.className = "feedback incorrect";
+      }
+    }
+  </script>
+</body>
+</html>
